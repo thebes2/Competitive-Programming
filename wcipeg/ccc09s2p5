@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MN = 1e5+5;
+int N, Q, i, x, y, z, id, st[3*MN][16];
+tuple<int,int,int> arr[MN];
+
+void apply(tuple<int,int,int> t, int id){
+	int s=get<0>(t)*4+get<1>(t),tmp=st[id][s],k=get<2>(t)-1;
+	for(int i=1;i<=k;i++) swap(tmp,st[id][s+i]);
+	for(int i=1;i<=k;i++) swap(tmp,st[id][s+i*4+k]);
+	for(int i=k-1;i>=0;i--) swap(tmp,st[id][s+k*4+i]);
+	for(int i=k-1;i>=0;i--) swap(tmp,st[id][s+i*4]);
+}
+
+void build(int i, int s, int e){
+	if(s != e){
+		build(2*i,s,(s+e)/2); build(2*i+1,(s+e)/2+1,e);
+		for(int j=0;j<16;j++) st[i][j]=st[2*i][st[2*i+1][j]];
+	}
+	else{
+		for(int j=0;j<16;j++) st[i][j] = j;
+		apply(arr[s], i);
+	}
+}
+
+void upd(int i, int s, int e, int ind){
+	if(s != e){
+		if(ind > (s+e)/2) upd(2*i+1,(s+e)/2+1,e,ind);
+		else upd(2*i,s,(s+e)/2,ind);
+		for(int j=0;j<16;j++) st[i][j]=st[2*i][st[2*i+1][j]];
+	}
+	else{
+		for(int j=0;j<16;j++) st[i][j] = j;
+		apply(arr[s], i);
+	}
+}
+
+int main(){
+	for(scanf("%d%d",&N,&Q),i=1;i<=N;i++){
+		scanf("%d%d%d",&x,&y,&z);
+		arr[i] = make_tuple(x-1,y-1,z);
+	}
+	build(1, 1, N);
+	for(;Q>0;Q--){
+		scanf("%d%d%d%d",&i,&x,&y,&z);
+		arr[i] = make_tuple(x-1,y-1,z); upd(1, 1, N, i);
+		for(i=0;i<16;i++){
+			printf("%d ",st[1][i]+1);
+			if(i%4==3) printf("\n");
+		}
+	}
+	return 0;
+}
